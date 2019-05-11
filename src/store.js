@@ -6,7 +6,11 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     csvData: null,
-    headers: null
+    headers: null,
+    selectedHeader: ''
+  },
+  getters: {
+    getheaders: state => state.headers
   },
   mutations: {
     setCsvData(state,data) {
@@ -14,7 +18,10 @@ export default new Vuex.Store({
     },
     setHeaders(state,data) {
       state.headers = data
-    }
+    },
+    setSelectedHeader(state,data) {
+      state.selectedHeader = data
+    },
   },
   actions: {
     loadCsv: function(context,files) {
@@ -39,6 +46,9 @@ export default new Vuex.Store({
         console.log(JSON.parse(final))
       };
       reader.readAsText(file)
+  },
+  addHeader: function(context, data) {
+    this.commit('setSelectedHeader', data)
   }
-  }
+}
 })

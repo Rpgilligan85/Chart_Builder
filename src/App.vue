@@ -17,7 +17,7 @@
       </v-flex>
     </v-layout>
 
-    <v-layout row>
+    <!-- <v-layout row>
       <v-flex>
         <ul v-if="selectedValues">
           <li 
@@ -28,7 +28,12 @@
           </li>
         </ul>
       </v-flex>
+    </v-layout> -->
 
+    <v-layout row>
+      <v-flex v-if="chartReady">
+        <Chart :title="selectedHeader" :data="chartData" :categories="headers" />
+      </v-flex>
     </v-layout>
     </v-container>
   </v-app>
@@ -38,15 +43,19 @@
 const d3 = require("d3");
 import { mapActions, mapState } from 'vuex'
 import dayjs from 'dayjs'
+import Chart from './components/Chart'
 
 export default {
   name: 'App',
   components: {
+    Chart
   },
   data () {
     return {
       selectedHeader: null,
-      selectedValues: null
+      selectedValues: null,
+      chartData: null,
+      chartReady: false
     }
   },
   methods: {
@@ -58,21 +67,23 @@ export default {
     },
     sortArr: function(arr) {
       arr.sort((a,b) => b-a)
-    }
-    
-  },
-  computed: {
-    ...mapActions(['loadCsv']),
-    ...mapState(['headers','csvData']),
-    
-    
-  },
-  watch: {
-    selectedHeader: function(val) {
-      console.log([...new Set(this.csvData.map(item => item[val]))])
+    },
+    parseData: function(val) {
+        let data = d3.nest()
+        .key(function(d) { return d[val]; })
+        .rollup(function(v) { return v.length; })
+        .entries(this.csvData);
+        let arr = []
+        for (let i = 0; i < data.length; i++) {
+            arr.push({ name: data[i].key, data: [data[i].value] })
+        }
+        console.log(arr)
+        this.chartReady = true
+        this.chartData = arr
+    },
+    getKeys: function(val) {
       if(val === 'Date') {
         let values = [...new Set(this.csvData.map(item => new Date(item[val]).getTime()))].sort()
-        console.log(values)
         for (let i = 0; i < values.length; i++) {
           values[i] = dayjs(values[i]).format('MM/DD/YYYY')
         }
@@ -80,6 +91,21 @@ export default {
       } else {
         this.selectedValues  = [...new Set(this.csvData.map(item => item[val]))].sort()
       } 
+    }
+    
+  },
+  computed: {
+    ...mapActions(['loadCsv', 'addHeader']),
+    ...mapState(['headers','csvData']),
+    
+    
+  },
+  watch: {
+    selectedHeader: function(val) {
+      this.$store.dispatch('addHeader', val)
+      this.parseData(val)
+      //this.getKeys(val)
+      
     }
   }
 }
