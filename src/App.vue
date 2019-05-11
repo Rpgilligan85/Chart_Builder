@@ -32,7 +32,7 @@
 
     <v-layout row>
       <v-flex v-if="chartReady">
-        <Chart :title="selectedHeader" :data="chartData" :categories="headers" />
+        <Chart :key="selectedHeader" :title="selectedHeader" :data="chartData" :categories="headers" />
       </v-flex>
     </v-layout>
     </v-container>

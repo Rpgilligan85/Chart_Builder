@@ -31,30 +31,8 @@ export default {
         ...mapGetters(['getheaders'])
     },
     methods: {
-        addSeries: function(index) {
-            console.log('add')
-            let chart = this.$refs.highcharts.chart;
-            for (let i = 0; i < this.data.length; i++) {
-                chart.addSeries(this.data[i]);
-            }
-        },
-        removeSeries: function() {
-            console.log('remove')
-            let chart = this.$refs.highcharts.chart;
-            console.log(chart.series)
-            for (let i = chart.series.length -1; i > -1; i--) {
-                chart.series[i].remove(true)
-            }
-        },
-        updateSeries: function() {
-            this.removeSeries()
-            this.addSeries()
-        }
     },
     watch: {
-        selectedHeader: function(){
-            this.updateSeries()
-        }
     }
 }
 </script>
