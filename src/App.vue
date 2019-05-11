@@ -1,28 +1,79 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <v-app>
+    <v-container>
+    <v-layout row wrap>
+      <v-flex sm2>
+        <v-btn @click="onClick">Upload CSV</v-btn>
+        <input id="hideInput" type="file" @change="loadFile($event.target.files)">
+      </v-flex>
+      <v-flex sm4>
+        <v-select
+          v-if="headers"
+          :items="headers"
+          label="Select Header"
+          solo
+          v-model="selectedHeader"
+          height="50px"
+        ></v-select>
+      </v-flex>
+    </v-layout>
+
+    <v-layout row>
+      <v-flex>
+        <ul v-if="selectedValues">
+          <li 
+            v-for="(item, key) in selectedValues"
+            :key="key"
+          >
+          {{ item }}
+          </li>
+        </ul>
+      </v-flex>
+
+    </v-layout>
+    </v-container>
+  </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+const d3 = require("d3");
+import { mapActions, mapState } from 'vuex'
 
 export default {
-  name: 'app',
+  name: 'App',
   components: {
-    HelloWorld
+  },
+  data () {
+    return {
+      selectedHeader: null,
+      selectedValues: null
+    }
+  },
+  methods: {
+    loadFile: function(file) {
+      this.$store.dispatch('loadCsv', file)
+    },
+    onClick: function() {
+      document.getElementById('hideInput').click()
+    }
+  },
+  computed: {
+    ...mapActions(['loadCsv']),
+    ...mapState(['headers','csvData'])
+  },
+  watch: {
+    selectedHeader: function(val) {
+      console.log([...new Set(this.csvData.map(item => item[val]))])
+      this.selectedValues = [...new Set(this.csvData.map(item => item[val]))];
+    }
   }
 }
 </script>
+<style>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+#hideInput {
+  display: none;
 }
+
+
 </style>
