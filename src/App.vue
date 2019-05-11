@@ -13,7 +13,6 @@
           label="Select Header"
           solo
           v-model="selectedHeader"
-          height="50px"
         ></v-select>
       </v-flex>
     </v-layout>
@@ -38,6 +37,7 @@
 <script>
 const d3 = require("d3");
 import { mapActions, mapState } from 'vuex'
+import dayjs from 'dayjs'
 
 export default {
   name: 'App',
@@ -55,16 +55,31 @@ export default {
     },
     onClick: function() {
       document.getElementById('hideInput').click()
+    },
+    sortArr: function(arr) {
+      arr.sort((a,b) => b-a)
     }
+    
   },
   computed: {
     ...mapActions(['loadCsv']),
-    ...mapState(['headers','csvData'])
+    ...mapState(['headers','csvData']),
+    
+    
   },
   watch: {
     selectedHeader: function(val) {
       console.log([...new Set(this.csvData.map(item => item[val]))])
-      this.selectedValues = [...new Set(this.csvData.map(item => item[val]))];
+      if(val === 'Date') {
+        let values = [...new Set(this.csvData.map(item => new Date(item[val]).getTime()))].sort()
+        console.log(values)
+        for (let i = 0; i < values.length; i++) {
+          values[i] = dayjs(values[i]).format('MM/DD/YYYY')
+        }
+        this.selectedValues = values
+      } else {
+        this.selectedValues  = [...new Set(this.csvData.map(item => item[val]))].sort()
+      } 
     }
   }
 }
