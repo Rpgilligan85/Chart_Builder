@@ -7,7 +7,10 @@ export default new Vuex.Store({
   state: {
     csvData: null,
     headers: null,
-    selectedHeader: ''
+    selectedHeader: '',
+    chartOptions: {},
+    chartData: null,
+    
   },
   getters: {
     getheaders: state => state.headers
@@ -22,6 +25,13 @@ export default new Vuex.Store({
     setSelectedHeader(state,data) {
       state.selectedHeader = data
     },
+    setChartOptions(state,obj) {
+      state.chartOptions = obj
+    },
+    setChartData(state,data) {
+      state.chartData = data
+    },
+    
   },
   actions: {
     loadCsv: function(context,files) {
@@ -49,6 +59,12 @@ export default new Vuex.Store({
   },
   addHeader: function(context, data) {
     this.commit('setSelectedHeader', data)
+  },
+  addChartOptions: function(context, obj) {
+    this.commit('setChartOptions', obj)
+  },
+  addChartData: function(context, data) {
+    this.commit('setChartData', data)
   }
 }
 })

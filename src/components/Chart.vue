@@ -3,12 +3,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 const d3 = require("d3");
 
 export default {
     name: 'Chart',
-    props:['title', 'data'],
+    props:['title', 'data', 'categories'],
     data() {
         return {
             chartReady: false,
@@ -28,11 +28,16 @@ export default {
     },
     computed: {
         ...mapState(['csvData','selectedHeader']),
-        ...mapGetters(['getheaders'])
+        ...mapGetters(['getheaders']),
+        ...mapActions(['addChartOptions'])
     },
     methods: {
     },
     watch: {
+    },
+    mounted() {
+        console.log(this.chartOptions)
+        this.$store.dispatch('addChartOptions', this.chartOptions)
     }
 }
 </script>
