@@ -5,7 +5,7 @@
 </template>
 
 <script>
-const d3 = require("d3");
+
 import { mapState, mapActions } from "vuex";
 
 
@@ -23,25 +23,7 @@ export default {
   methods: {
     sortArr: function(arr) {
       arr.sort((a, b) => b - a);
-    },
-    parseData: function(val) {
-      let data = d3
-        .nest()
-        .key(function(d) {
-          return d[val];
-        })
-        .rollup(function(v) {
-          return v.length;
-        })
-        .entries(this.csvData);
-      let arr = [];
-      for (let i = 0; i < data.length; i++) {
-        arr.push({ name: data[i].key, data: [data[i].value] });
-      }
-      console.log(arr);
-      this.chartReady = true;
-      this.$store.dispatch("addChartData", arr);
-    },
+    },   
     getKeys: function(val) {
       if (val === "Date") {
         let values = [
@@ -59,13 +41,13 @@ export default {
     }
   },
   computed: {
-    ...mapActions(["addChartData", "addHeader"]),
-    ...mapState(["headers", "csvData",])
+    ...mapActions(["addChartData", "addHeader", "parseData"]),
+    ...mapState(["headers", "csvData","chartType"])
   },
   watch: {
     selectedHeader: function(val) {
       this.$store.dispatch("addHeader", val);
-      this.parseData(val);
+      this.$store.dispatch("parseData",  {val:val, type:this.chartType, data:this.csvData});
     }
   }
 };

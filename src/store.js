@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+const d3 = require("d3");
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -10,6 +10,7 @@ export default new Vuex.Store({
     selectedHeader: '',
     chartOptions: {},
     chartData: null,
+    chartType: null
     
   },
   getters: {
@@ -30,6 +31,9 @@ export default new Vuex.Store({
     },
     setChartData(state,data) {
       state.chartData = data
+    },
+    setChartType(state,data) {
+      state.chartType = data
     },
     
   },
@@ -57,14 +61,32 @@ export default new Vuex.Store({
       };
       reader.readAsText(file)
   },
+  parseData: function(context, obj) {
+    let data = d3
+      .nest()
+      .key(function(d) {
+        return d[obj.val];
+      })
+      .rollup(function(v) {
+        return v.length;
+      })
+      .entries(obj.data);
+    let arr = [];
+    for (let i = 0; i < data.length; i++) {
+      obj.type === 'pie' ? arr.push({ name: data[i].key, y: data[i].value }) : arr.push({ name: data[i].key, data: [data[i].value] })
+    }
+    console.log(arr);
+    this.chartReady = true;
+    this.commit('setChartData', arr)
+  },
   addHeader: function(context, data) {
     this.commit('setSelectedHeader', data)
   },
   addChartOptions: function(context, obj) {
     this.commit('setChartOptions', obj)
   },
-  addChartData: function(context, data) {
-    this.commit('setChartData', data)
+  addChartType: function(context, data) {
+    this.commit('setChartType', data)
   }
 }
 })

@@ -11,7 +11,7 @@ import { mapState, mapActions } from "vuex";
 const d3 = require("d3");
 
 export default {
-  name: "BarChart",
+  name: "PieChart",
   data() {
     return {
       chartReady: false
@@ -30,10 +30,19 @@ export default {
         title: {
           text: this.selectedHeader
         },
-        xAxis: {
-          categories: this.headers
+        plotOptions: {
+          pie: {
+              allowPointSelect: true,
+              cursor: 'pointer',
+              dataLabels: {
+                  enabled: true,
+                  format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+              }
+          }
         },
-        series: this.chartData
+        series: [{
+          data: this.chartData
+        }]
       };
     }
   },
