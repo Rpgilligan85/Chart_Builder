@@ -7,10 +7,15 @@
           <input id="hideInput" type="file" @change="loadFile($event.target.files)">
         </v-flex>
         <ChartType v-if="chooseChart"/>
-        <SelectMenu v-if="loadChart" />
-        
+        <SelectMenu v-if="loadChart" v-model="selectedHeader[0]"/>
+        <SelectMenu v-if="loadChart" v-model="selectedHeader[1]"/>
+        <v-checkbox
+          v-model="stacked"
+          v-if="selectedHeader[1]"
+          :label="`Stacked = ${stacked.toString()}`"
+        ></v-checkbox>
       </v-layout>
-        <component :key="selectedHeader" v-if="chartData" :is="chartComp" />
+        <component :key="selectedHeader[0]" v-if="chartData" :is="chartComp" :stacked="toggleStack" />
         <v-flex sm2>
           <v-btn v-if="chartData" @click.stop="drawer = !drawer">View Data</v-btn>
         </v-flex>
@@ -53,7 +58,10 @@ export default {
       chartDrawer: false,
       loadChart: false,
       chartComp: null,
-      chooseChart: false
+      chooseChart: false,
+      selectedHeader: [],
+      stacked: false,
+      toggleStack: ''
     };
   },
   methods: {
@@ -76,14 +84,21 @@ export default {
     }
   },
   computed: {
-    ...mapActions(["loadCsv"]),
-    ...mapState(["chartData","chartOptions", "chartType", "selectedHeader"]),
+    ...mapActions(["loadCsv", 'addHeader', 'parseData']),
+    ...mapState(["chartData","chartOptions","chartType",'csvData']),
 
     
   },
   watch: {
     chartType: function() {
       this.getChartType()
+    },
+    selectedHeader: function(val) {
+      this.$store.dispatch("addHeader", val);
+      this.$store.dispatch("parseData",  {val:val, type:this.chartType, data:this.csvData});
+    },
+    stacked: function(val) {
+      val ? this.toggleStack = 'normal' : this.toggleStack = '';
     }
   }
 };

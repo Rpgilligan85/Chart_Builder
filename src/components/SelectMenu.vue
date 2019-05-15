@@ -1,6 +1,6 @@
 <template v-if="chartReady">
   <v-flex sm4>
-    <v-select v-if="headers" :items="headers" label="Select Header" solo v-model="selectedHeader"></v-select>
+    <v-select v-if="headers" :items="headers" label="Select Header" solo v-on:change="updateValue"></v-select>
   </v-flex>
 </template>
 
@@ -11,7 +11,7 @@ import { mapState, mapActions } from "vuex";
 
 export default {
   name: "SelectMenu",
-
+  props: ['value'],
   data() {
     return {
       selectedHeader: null,
@@ -23,7 +23,11 @@ export default {
   methods: {
     sortArr: function(arr) {
       arr.sort((a, b) => b - a);
-    },   
+    },
+    updateValue: function(value) {
+      console.log(value)
+      this.$emit('input', value)
+    },
     getKeys: function(val) {
       if (val === "Date") {
         let values = [
@@ -43,12 +47,6 @@ export default {
   computed: {
     ...mapActions(["addChartData", "addHeader", "parseData"]),
     ...mapState(["headers", "csvData","chartType"])
-  },
-  watch: {
-    selectedHeader: function(val) {
-      this.$store.dispatch("addHeader", val);
-      this.$store.dispatch("parseData",  {val:val, type:this.chartType, data:this.csvData});
-    }
   }
 };
 </script>

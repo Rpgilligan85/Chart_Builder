@@ -12,13 +12,14 @@ const d3 = require("d3");
 
 export default {
   name: "BarChart",
+  props:['stacked'],
   data() {
     return {
       chartReady: false
     };
   },
   computed: {
-    ...mapState(["chartType", "chartData", "headers", "selectedHeader"]),
+    ...mapState(["chartType", "chartData", "chartCategories", "selectedHeader"]),
     ...mapActions(["addChartOptions"])
   },
   methods: {
@@ -28,18 +29,31 @@ export default {
           type: this.chartType
         },
         title: {
-          text: this.selectedHeader
+          text: this.selectedHeader[0]
         },
         xAxis: {
-          categories: this.headers
+          categories: this.chartCategories
         },
+        plotOptions: {
+          column: {
+              stacking: this.stacked,
+              dataLabels: {
+                  enabled: true,
+                  color: 'white'
+              }
+          }
+      },
         series: this.chartData
       };
     }
   },
-  watch: {},
+  watch: {
+    chartData: function() {
+      console.log(this.chartOptions());
+      this.$store.dispatch("addChartOptions", this.chartOptions());
+    }
+  },
   mounted() {
-    console.log(this.chartOptions);
     this.$store.dispatch("addChartOptions", this.chartOptions());
   }
 };
