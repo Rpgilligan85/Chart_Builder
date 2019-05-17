@@ -11,7 +11,7 @@ export default {
     name: 'ChartType',
     data () {
       return {
-        chartTypes: ['column', 'pie'],
+        chartTypes: ['column', 'pie', 'line'],
         selectedChart: null
       }
   },

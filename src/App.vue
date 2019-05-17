@@ -8,14 +8,10 @@
         </v-flex>
         <ChartType v-if="chooseChart"/>
         <SelectMenu v-if="loadChart" v-model="selectedHeader[0]"/>
-        <SelectMenu v-if="loadChart" v-model="selectedHeader[1]"/>
-        <v-checkbox
-          v-model="stacked"
-          v-if="selectedHeader[1]"
-          :label="`Stacked = ${stacked.toString()}`"
-        ></v-checkbox>
+        <SelectMenu v-if="loadChart && chartType != 'pie'" v-model="selectedHeader[1]"/>
+        
       </v-layout>
-        <component :key="selectedHeader[0]" v-if="chartData" :is="chartComp" :stacked="toggleStack" />
+        <component :key="selectedHeader[1]" v-if="chartData" :is="chartComp" />
         <v-flex sm2>
           <v-btn v-if="chartData" @click.stop="drawer = !drawer">View Data</v-btn>
         </v-flex>
@@ -25,11 +21,11 @@
     </v-container>
 
     <v-navigation-drawer v-model="drawer" absolute temporary right>
-      <vue-json-pretty :data="chartData" :deep="2"/>
+      <vue-json-pretty :data="chartData" :deep="4"/>
     </v-navigation-drawer>
 
     <v-navigation-drawer v-model="chartDrawer" absolute temporary right>
-      <vue-json-pretty :data="chartOptions" :deep="2"/>
+      <vue-json-pretty :data="chartOptions" :deep="4"/>
     </v-navigation-drawer>
 
   </v-app>
@@ -42,6 +38,7 @@ import ChartType from "./components/ChartType";
 import BarChart from "./components/BarChart";
 import PieChart from "./components/PieChart";
 import SelectMenu from "./components/SelectMenu";
+import LineChart from "./components/LineChart";
 
 export default {
   name: "App",
@@ -50,6 +47,7 @@ export default {
     PieChart,
     ChartType,
     SelectMenu,
+    LineChart,
     VueJsonPretty
   },
   data() {
@@ -60,8 +58,6 @@ export default {
       chartComp: null,
       chooseChart: false,
       selectedHeader: [],
-      stacked: false,
-      toggleStack: ''
     };
   },
   methods: {
@@ -73,12 +69,12 @@ export default {
       document.getElementById("hideInput").click();
     },
     getChartType: function() {
-      if(this.chartType === 'column' || this.chartType === 'line') {
-        console.log('BarChart')
+      if(this.chartType === 'column') {
         this.chartComp = 'BarChart'
       } else if (this.chartType === 'pie') {
-        console.log('PieChart')
         this.chartComp = 'PieChart'
+      } else if (this.chartType === 'line') {
+        this.chartComp = 'LineChart'
       }
       this.loadChart = true
     }
@@ -94,12 +90,11 @@ export default {
       this.getChartType()
     },
     selectedHeader: function(val) {
+      console.log('FALSE',val);
       this.$store.dispatch("addHeader", val);
       this.$store.dispatch("parseData",  {val:val, type:this.chartType, data:this.csvData});
     },
-    stacked: function(val) {
-      val ? this.toggleStack = 'normal' : this.toggleStack = '';
-    }
+    
   }
 };
 </script>

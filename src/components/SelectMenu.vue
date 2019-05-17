@@ -21,28 +21,10 @@ export default {
     };
   },
   methods: {
-    sortArr: function(arr) {
-      arr.sort((a, b) => b - a);
-    },
     updateValue: function(value) {
       console.log(value)
       this.$emit('input', value)
     },
-    getKeys: function(val) {
-      if (val === "Date") {
-        let values = [
-          ...new Set(this.csvData.map(item => new Date(item[val]).getTime()))
-        ].sort();
-        for (let i = 0; i < values.length; i++) {
-          values[i] = dayjs(values[i]).format("MM/DD/YYYY");
-        }
-        this.selectedValues = values;
-      } else {
-        this.selectedValues = [
-          ...new Set(this.csvData.map(item => item[val]))
-        ].sort();
-      }
-    }
   },
   computed: {
     ...mapActions(["addChartData", "addHeader", "parseData"]),

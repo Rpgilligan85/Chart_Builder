@@ -1,14 +1,9 @@
 <template>
 <div>
-  <v-checkbox
-      v-model="stacked"
-      v-if="selectedHeader[1]"
-      :label="`Stacked = ${stacked.toString()}`"
-    ></v-checkbox>
   <v-layout row>
-    
     <v-flex>
-      <highcharts :options="chartOptions()" ref="highcharts"></highcharts>
+      <highcharts v-if="chartData[0].date" :options="chartOptions()" :constructor-type="'stockChart'" ref="lineChart"></highcharts>
+      <highcharts v-else :options="chartOptions()" ref="lineChart"></highcharts>
     </v-flex>
   </v-layout>
 </div>
@@ -19,15 +14,14 @@ import { mapState, mapActions } from "vuex";
 const d3 = require("d3");
 
 export default {
-  name: "BarChart",
+  name: "LineChart",
   data() {
     return {
       chartReady: false,
-      stacked: false
     };
   },
   computed: {
-    ...mapState(["chartType", "chartData", "chartCategories", "selectedHeader"]),
+    ...mapState(["chartType", "chartData", "chartCategories", "selectedHeader", "csvData"]),
     ...mapActions(["addChartOptions"])
   },
   methods: {
@@ -37,7 +31,7 @@ export default {
           type: this.chartType
         },
         title: {
-          text: 'Bar Chart'
+          text: 'Line Chart'
         },
         xAxis: {
           categories: this.chartCategories
@@ -59,9 +53,6 @@ export default {
     chartData: function() {
       console.log(this.chartOptions());
       this.$store.dispatch("addChartOptions", this.chartOptions());
-    },
-    stacked: function(val) {
-      val ? this.stacked = 'normal' : this.stacked = '';
     }
   },
   mounted() {

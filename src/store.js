@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import dayjs from 'dayjs'
 const d3 = require("d3");
 Vue.use(Vuex)
 
@@ -61,15 +62,15 @@ export default new Vuex.Store({
         let final = JSON.stringify(result)
         this.commit('setCsvData',JSON.parse(final))
         this.commit('setHeaders',headers)
-        console.log(JSON.parse(final))
       };
       reader.readAsText(file)
   },
   parseData: function(context, obj) {
-    console.log('obj',obj);
-    if(obj.val.length <= 1) {
+    if(obj.val.length <= 1 && this.chartType === 'column') {
       this.dispatch('parseSingleData', obj)
-    } else {
+    } else if (obj.val.length >=2 && dayjs(obj.data[0][obj.val[1]]).$D) {
+      this.dispatch('parseDoubleDateData', obj)
+    } else if (obj.val.length >=2) {
       this.dispatch('parseDoubleData', obj)
     }
   },
@@ -88,12 +89,38 @@ export default new Vuex.Store({
     for (let i = 0; i < data.length; i++) {
       obj.type === 'pie' ? arr.push({ name: data[i].key, y: data[i].value }) : arr.push({ name: data[i].key, data: [data[i].value] })
     }
-    console.log(arr);
     this.chartReady = true;
     this.commit('setChartData', arr)
   },
+  parseDoubleDateData: function(context,obj) {
+    let data = d3
+      .nest()
+      .key(function(d) {
+        return d[obj.val[0]];
+      })
+      .key(function(d) {
+        return new Date(d[obj.val[1]]).getTime();
+      })
+      .rollup(function(v) {
+        return v.length;
+      })
+      .entries(obj.data);
+      let arr = [];
+      for (let i = 0; i < data.length; i++) {
+        arr.push({ name: data[i].key, data: [], date:true })
+        for (let k = 0; k < data[i].values.length; k++) {
+          arr[i].data.push([Number(data[i].values[k].key),data[i].values[k].value])
+        }
+      }
+      for (let j = 0; j < arr.length; j++) {        
+        arr[j].data.sort(function(a,b){
+          return a[0] - b[0]
+        })
+      }
+      console.log('ARR',arr);
+    this.commit('setChartData', arr)
+  },
   parseDoubleData: function(context,obj) {
-    console.log('obj',obj);
     let data = d3
       .nest()
       .key(function(d) {
@@ -118,8 +145,7 @@ export default new Vuex.Store({
           arr[i].data.push(data[i].values[k].value)
         }
       }
-    console.log('arr',arr);
-    console.log('cat',cat);
+
 
     this.chartReady = true;
     this.commit('setChartData', arr)

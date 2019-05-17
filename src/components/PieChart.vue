@@ -28,7 +28,7 @@ export default {
           type: this.chartType
         },
         title: {
-          text: this.selectedHeader
+          text: 'Pie Chart'
         },
         plotOptions: {
           pie: {
@@ -48,7 +48,7 @@ export default {
   },
   watch: {},
   mounted() {
-    console.log(this.chartOptions);
+    console.log(this.chartOptions());
     this.$store.dispatch("addChartOptions", this.chartOptions());
   }
 };
