@@ -1,16 +1,40 @@
 <template>
-  <v-app>
-    <v-container>
+  <v-app dark>
+    <v-toolbar>
+      <v-toolbar-title>ATC Dynamic Chart Builder</v-toolbar-title>
+    </v-toolbar>
+    <v-container fluid class="fullWidthContainer">
+
       <v-layout row wrap>
-        <v-flex sm2>
-          <v-btn @click="onClick">Upload CSV</v-btn>
-          <input id="hideInput" type="file" @change="loadFile($event.target.files)">
+        <v-flex class="uploadContainer">
+          <v-card flat height="100px">
+            <v-container>
+              <v-layout row align-center justify-center>
+                  <span class="uploadText">Choose a CSV file to start generating your chart!</span>
+                  <v-btn @click="onClick">Upload CSV</v-btn>
+                  <input id="hideInput" type="file" @change="loadFile($event.target.files)">
+              </v-layout>
+            </v-container>
+          </v-card>
         </v-flex>
-        <ChartType v-if="chooseChart"/>
-        <SelectMenu v-if="loadChart" v-model="selectedHeader[0]"/>
-        <SelectMenu v-if="loadChart && chartType != 'pie'" v-model="selectedHeader[1]"/>
-        
       </v-layout>
+      <v-layout row wrap>
+        <v-flex>
+          <v-container fluid class="fullWidthContainer">
+            <v-layout class="charts-container" align-center justify-center>
+              <v-img class="chart-image" contain src="images/bar-chart.svg" width="100px"></v-img>
+              <v-img class="chart-image" contain src="images/pie-chart.svg" width="100px"></v-img>
+              <v-img class="chart-image" contain src="images/line-chart.svg" width="100px"></v-img>
+            </v-layout>
+          </v-container>
+        <v-card>
+        <!-- <ChartType v-if="chooseChart" /> 
+        <SelectMenu v-if="loadChart" v-model="selectedHeader[0]"/>
+        <SelectMenu v-if="loadChart && chartType != 'pie'" v-model="selectedHeader[1]"/> -->
+        </v-card>
+        </v-flex>
+      </v-layout>
+        
         <component :key="selectedHeader[1]" v-if="chartData" :is="chartComp" />
         <v-flex sm2>
           <v-btn v-if="chartData" @click.stop="drawer = !drawer">View Data</v-btn>
@@ -18,7 +42,6 @@
         <v-flex sm2>
           <v-btn v-if="chartData" @click.stop="chartDrawer = !chartDrawer">View Chart JSON</v-btn>
         </v-flex>
-    </v-container>
 
     <v-navigation-drawer v-model="drawer" absolute temporary right>
       <vue-json-pretty :data="chartData" :deep="4"/>
@@ -27,6 +50,7 @@
     <v-navigation-drawer v-model="chartDrawer" absolute temporary right>
       <vue-json-pretty :data="chartOptions" :deep="4"/>
     </v-navigation-drawer>
+    </v-container>
 
   </v-app>
 </template>
@@ -98,8 +122,38 @@ export default {
   }
 };
 </script>
-<style>
+<style lang="scss">
+
 #hideInput {
   display: none;
+}
+
+.fullWidthContainer {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+}
+
+.chart-image {
+  margin: 20px;
+  max-width: 200px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+.charts-container {
+  background: rgb(83, 83, 83);
+  padding: 40px 0;
+}
+
+.uploadContainer {
+  height: 100px;
+}
+.uploadText {
+  font-size: 18px;
+  padding-right: 20px;
 }
 </style>
