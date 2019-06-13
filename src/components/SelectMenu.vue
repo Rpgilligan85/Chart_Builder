@@ -1,5 +1,6 @@
 <template v-if="chartReady">
-  <v-flex sm4>
+  <v-flex xs12>
+    {{text}}
     <v-select v-if="headers" :items="headers" label="Select Header" solo v-on:change="updateValue"></v-select>
   </v-flex>
 </template>
@@ -11,7 +12,7 @@ import { mapState, mapActions } from "vuex";
 
 export default {
   name: "SelectMenu",
-  props: ['value'],
+  props: ['value','text'],
   data() {
     return {
       selectedHeader: null,

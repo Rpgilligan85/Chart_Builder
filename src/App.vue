@@ -3,54 +3,57 @@
     <v-toolbar>
       <v-toolbar-title>ATC Dynamic Chart Builder</v-toolbar-title>
     </v-toolbar>
-    <v-container fluid class="fullWidthContainer">
-
-      <v-layout row wrap>
-        <v-flex class="uploadContainer">
-          <v-card flat height="100px">
-            <v-container>
-              <v-layout row align-center justify-center>
-                  <span class="uploadText">Choose a CSV file to start generating your chart!</span>
-                  <v-btn @click="onClick">Upload CSV</v-btn>
-                  <input id="hideInput" type="file" @change="loadFile($event.target.files)">
-              </v-layout>
-            </v-container>
-          </v-card>
-        </v-flex>
-      </v-layout>
-      <v-layout row wrap>
-        <v-flex>
-          <v-container fluid class="fullWidthContainer">
-            <v-layout class="charts-container" align-center justify-center>
-              <v-img class="chart-image" contain src="images/bar-chart.svg" width="100px"></v-img>
-              <v-img class="chart-image" contain src="images/pie-chart.svg" width="100px"></v-img>
-              <v-img class="chart-image" contain src="images/line-chart.svg" width="100px"></v-img>
+    <v-container fluid class="fullWidthContainer" fill-height>
+    <v-layout column class="chartMenu" >
+      
+      <v-layout class="csvBtn" row>
+        <v-card height="100px" flat width="100%">
+          <v-container>
+            <v-layout row align-center>
+                <span class="uploadText">Choose a CSV file to start generating your chart!</span>
+                <v-btn @click="onClick">Upload CSV</v-btn>
+                <input id="hideInput" type="file" @change="loadFile($event.target.files)">
             </v-layout>
           </v-container>
-        <v-card>
-        <!-- <ChartType v-if="chooseChart" /> 
-        <SelectMenu v-if="loadChart" v-model="selectedHeader[0]"/>
-        <SelectMenu v-if="loadChart && chartType != 'pie'" v-model="selectedHeader[1]"/> -->
         </v-card>
-        </v-flex>
       </v-layout>
-        
-        <component :key="selectedHeader[1]" v-if="chartData" :is="chartComp" />
-        <v-flex sm2>
-          <v-btn v-if="chartData" @click.stop="drawer = !drawer">View Data</v-btn>
-        </v-flex>
-        <v-flex sm2>
-          <v-btn v-if="chartData" @click.stop="chartDrawer = !chartDrawer">View Chart JSON</v-btn>
-        </v-flex>
 
-    <v-navigation-drawer v-model="drawer" absolute temporary right>
-      <vue-json-pretty :data="chartData" :deep="4"/>
-    </v-navigation-drawer>
+       <v-layout class="chartSelector" v-if="chooseChart" row>
+        <v-img @click="updateChart('column')" class="chart-image" contain src="images/bar-chart.svg" width="100px"></v-img>
+        <v-img @click="updateChart('pie')" class="chart-image" contain src="images/pie-chart.svg" width="100px"></v-img>
+        <v-img @click="updateChart('line')" class="chart-image" contain src="images/line-chart.svg" width="100px"></v-img>
+      </v-layout>
 
-    <v-navigation-drawer v-model="chartDrawer" absolute temporary right>
-      <vue-json-pretty :data="chartOptions" :deep="4"/>
-    </v-navigation-drawer>
-    </v-container>
+      <v-layout row>
+          <SelectMenu :text="'Primary Grouping'" v-if="loadChart" v-model="selectedHeader[0]"/>
+          <SelectMenu :text="'Secondary Grouping'" v-if="loadChart && chartType != 'pie'" v-model="selectedHeader[1]"/> 
+      </v-layout>
+
+    </v-layout>
+
+       <v-layout column >
+         <v-flex xs12 class="chartContainer">
+          <component :key="selectedHeader[1]" v-if="chartData" :is="chartComp" />
+         </v-flex>
+
+          <v-layout>
+            <v-flex sm2>
+              <v-btn v-if="chartData" @click.stop="drawer = !drawer">View Data</v-btn>
+            </v-flex>
+            <v-flex sm2>
+              <v-btn v-if="chartData" @click.stop="chartDrawer = !chartDrawer">View Chart JSON</v-btn>
+            </v-flex>
+          </v-layout>
+    </v-layout>
+
+          <v-navigation-drawer v-model="drawer" absolute temporary right>
+            <vue-json-pretty :data="chartData" :deep="4"/>
+          </v-navigation-drawer>
+
+          <v-navigation-drawer v-model="chartDrawer" absolute temporary right>
+            <vue-json-pretty :data="chartOptions" :deep="4"/>
+          </v-navigation-drawer>
+</v-container>
 
   </v-app>
 </template>
@@ -101,10 +104,13 @@ export default {
         this.chartComp = 'LineChart'
       }
       this.loadChart = true
+    },
+    updateChart(chart) {
+      this.$store.dispatch('addChartType', chart)
     }
   },
   computed: {
-    ...mapActions(["loadCsv", 'addHeader', 'parseData']),
+    ...mapActions(["loadCsv", 'addHeader', 'parseData', 'addChartType']),
     ...mapState(["chartData","chartOptions","chartType",'csvData']),
 
     
@@ -128,6 +134,28 @@ export default {
   display: none;
 }
 
+.csvBtn {
+  height: 100px;
+  max-height: 100px;
+}
+
+.chartSelector {
+  height: 200px;
+  max-height: 200px;
+}
+
+.chartContainer {
+  height: 600px;
+  max-height: 600px;
+  padding: 20px;
+}
+
+.chartMenu {
+  width: 400px;
+  max-width: 400px;
+  background: #222;
+}
+
 .fullWidthContainer {
   width: 100%;
   max-width: 100%;
@@ -136,7 +164,7 @@ export default {
 
 .chart-image {
   margin: 20px;
-  max-width: 200px;
+  max-width: 150px;
   cursor: pointer;
 
   &:hover {
@@ -153,7 +181,7 @@ export default {
   height: 100px;
 }
 .uploadText {
-  font-size: 18px;
+  font-size: 14px;
   padding-right: 20px;
 }
 </style>
