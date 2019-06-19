@@ -45,7 +45,7 @@
           <v-flex xs12 v-if="chartData">
             <v-card class="colorOptions">
                 <swatches v-if="updateColor" v-model="colors" />
-              <p v-for="(item, key) in colorList()" :key="key">
+              <p v-for="(item, key) in colorObj" :key="key">
                 {{item.name}}: <span @click="openPicker(item.color,key)" :style="{color: item.color}">{{item.color }}</span>
               </p>
             </v-card>
@@ -99,7 +99,8 @@ export default {
       colors: '#333',
       updateColor: false,
       updatedColor: null,
-      updatedColorKey: null
+      updatedColorKey: null,
+      colorObj: null
     };
   },
   methods: {
@@ -125,12 +126,14 @@ export default {
     },
     colorList() {
       let chartCheck = Highcharts.charts.length > 0;
+      let chart;
       if (chartCheck) {
         if(this.chartType === 'pie') {
-          return this.$refs.chartComp.$refs.highcharts.chart.series[0].data
+          chart = this.$refs.chartComp.$refs.highcharts.chart.series[0].data
         } else {
-          return this.$refs.chartComp.$refs.highcharts.chart.series
+          chart = this.$refs.chartComp.$refs.highcharts.chart.series
         }
+        this.colorObj = chart;
       }
     },
     openPicker(color,key) {
@@ -164,7 +167,7 @@ export default {
       this.getChartType()
     },
     selectedHeader: function(val) {
-
+      this.colorList()
       this.$store.dispatch("addHeader", val);
       this.$store.dispatch("parseData",  {val:val, type:this.chartType, data:this.csvData});
     },
