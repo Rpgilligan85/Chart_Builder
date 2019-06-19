@@ -1,9 +1,5 @@
 <template>
-  <v-layout row>
-    <v-flex>
-      <highcharts :options="chartOptions()" ref="highcharts"></highcharts>
-    </v-flex>
-  </v-layout>
+      <highcharts id="chart_height" :options="chartOptions()" ref="highcharts"></highcharts>
 </template>
 
 <script>

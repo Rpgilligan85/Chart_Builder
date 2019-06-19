@@ -5,12 +5,7 @@
       v-if="selectedHeader[1]"
       :label="`Stacked = ${stacked.toString()}`"
     ></v-checkbox>
-  <v-layout row>
-    
-    <v-flex>
-      <highcharts :options="chartOptions()" ref="highcharts"></highcharts>
-    </v-flex>
-  </v-layout>
+        <highcharts id="chart_height" :options="chartOptions()" ref="highcharts"></highcharts>
 </div>
 </template>
 
@@ -34,7 +29,8 @@ export default {
     chartOptions: function() {
       return {
         chart: {
-          type: this.chartType
+          type: this.chartType,
+          isDirtyBox: true
         },
         title: {
           text: 'Bar Chart'
@@ -71,4 +67,5 @@ export default {
 </script>
 
 <style lang="scss">
+
 </style>

@@ -1,11 +1,7 @@
 <template>
 <div>
-  <v-layout row>
-    <v-flex>
-      <highcharts v-if="chartData[0].date" :options="chartOptions()" :constructor-type="'stockChart'" ref="lineChart"></highcharts>
-      <highcharts v-else :options="chartOptions()" ref="lineChart"></highcharts>
-    </v-flex>
-  </v-layout>
+      <highcharts id="chart_height" v-if="chartData[0].date" :options="chartOptions()" :constructor-type="'stockChart'" ref="highcharts"></highcharts>
+      <highcharts id="chart_height" v-else :options="chartOptions()" ref="highcharts"></highcharts>
 </div>
 </template>
 
@@ -35,6 +31,9 @@ export default {
         },
         xAxis: {
           categories: this.chartCategories
+        },
+        legend: {
+          enabled:false
         },
         plotOptions: {
           column: {

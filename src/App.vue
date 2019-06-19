@@ -18,33 +18,40 @@
         </v-card>
       </v-layout>
 
-       <v-layout class="chartSelector" v-if="chooseChart" row>
+       <v-layout justify-center class="chartSelector" v-if="chooseChart" row>
         <v-img @click="updateChart('column')" class="chart-image" contain src="images/bar-chart.svg" width="100px"></v-img>
         <v-img @click="updateChart('pie')" class="chart-image" contain src="images/pie-chart.svg" width="100px"></v-img>
         <v-img @click="updateChart('line')" class="chart-image" contain src="images/line-chart.svg" width="100px"></v-img>
       </v-layout>
 
-      <v-layout row>
-          <SelectMenu :text="'Primary Grouping'" v-if="loadChart" v-model="selectedHeader[0]"/>
-          <SelectMenu :text="'Secondary Grouping'" v-if="loadChart && chartType != 'pie'" v-model="selectedHeader[1]"/> 
+      <v-layout row class="chartGroupings">
+        <v-flex d-flex xs12 class="chartGroupings">
+            <SelectMenu :text="'Primary Grouping'" v-if="loadChart" v-model="selectedHeader[0]"/>
+            <SelectMenu :text="'Secondary Grouping'" v-if="loadChart && chartType != 'pie'" v-model="selectedHeader[1]"/> 
+        </v-flex>
+      </v-layout>
+
+      <v-layout justify-center align-end class="mb-5">
+        <v-btn v-if="chartData" @click.stop="drawer = !drawer">View Data</v-btn>
+        <v-btn v-if="chartData" @click.stop="chartDrawer = !chartDrawer">View Chart JSON</v-btn>
       </v-layout>
 
     </v-layout>
 
-       <v-layout column >
-         <v-flex xs12 class="chartContainer">
-          <component :key="selectedHeader[1]" v-if="chartData" :is="chartComp" />
-         </v-flex>
+        <v-layout row wrap class="rightContainer">
+          <v-flex xs12 class="chartContainer">
+            <component :key="selectedHeader[1]" v-if="chartData" :is="chartComp" ref="chartComp"/>
+          </v-flex>
+          <v-flex xs12 v-if="chartData">
+            <v-card class="colorOptions">
+                <swatches v-if="updateColor" v-model="colors" />
+              <p v-for="(item, key) in colorList()" :key="key">
+                {{item.name}}: <span @click="openPicker(item.color,key)" :style="{color: item.color}">{{item.color }}</span>
+              </p>
+            </v-card>
+          </v-flex>
+        </v-layout>
 
-          <v-layout>
-            <v-flex sm2>
-              <v-btn v-if="chartData" @click.stop="drawer = !drawer">View Data</v-btn>
-            </v-flex>
-            <v-flex sm2>
-              <v-btn v-if="chartData" @click.stop="chartDrawer = !chartDrawer">View Chart JSON</v-btn>
-            </v-flex>
-          </v-layout>
-    </v-layout>
 
           <v-navigation-drawer v-model="drawer" absolute temporary right>
             <vue-json-pretty :data="chartData" :deep="4"/>
@@ -66,6 +73,8 @@ import BarChart from "./components/BarChart";
 import PieChart from "./components/PieChart";
 import SelectMenu from "./components/SelectMenu";
 import LineChart from "./components/LineChart";
+import Highcharts from 'highcharts'
+import {Swatches} from 'vue-color'
 
 export default {
   name: "App",
@@ -75,7 +84,8 @@ export default {
     ChartType,
     SelectMenu,
     LineChart,
-    VueJsonPretty
+    VueJsonPretty,
+    Swatches
   },
   data() {
     return {
@@ -85,6 +95,11 @@ export default {
       chartComp: null,
       chooseChart: false,
       selectedHeader: [],
+      chart: null,
+      colors: '#333',
+      updateColor: false,
+      updatedColor: null,
+      updatedColorKey: null
     };
   },
   methods: {
@@ -107,28 +122,68 @@ export default {
     },
     updateChart(chart) {
       this.$store.dispatch('addChartType', chart)
+    },
+    colorList() {
+      let chartCheck = Highcharts.charts.length > 0;
+      if (chartCheck) {
+        if(this.chartType === 'pie') {
+          return this.$refs.chartComp.$refs.highcharts.chart.series[0].data
+        } else {
+          return this.$refs.chartComp.$refs.highcharts.chart.series
+        }
+      }
+    },
+    openPicker(color,key) {
+      console.log('color',color,key);
+      this.updateColor = true
+      this.updatedColorKey = key
+    },
+    changeColor() {
+      let chart = this.$refs.chartComp.$refs.highcharts.chart;
+      let series;
+      if(this.chartType === 'pie') {
+        series = this.$refs.chartComp.$refs.highcharts.chart.series[0].data
+      } else {
+        series = this.$refs.chartComp.$refs.highcharts.chart.series
+      }
+      console.log('chart',chart);
+      series[this.updatedColorKey].options.color = this.updatedColor;
+      series[this.updatedColorKey].update(series[this.updatedColorKey].options, true);
     }
+    
   },
   computed: {
     ...mapActions(["loadCsv", 'addHeader', 'parseData', 'addChartType']),
     ...mapState(["chartData","chartOptions","chartType",'csvData']),
-
-    
   },
   watch: {
-    chartType: function() {
+    chartType: function(val) {
+      if(this.selectedHeader.length > 0) {
+       this.$store.dispatch("parseData",  {val:this.selectedHeader, type:val, data:this.csvData});
+      }
       this.getChartType()
     },
     selectedHeader: function(val) {
-      console.log('FALSE',val);
+
       this.$store.dispatch("addHeader", val);
       this.$store.dispatch("parseData",  {val:val, type:this.chartType, data:this.csvData});
     },
+
+    colors: function(val) {
+      console.log('COLORS',val);
+      this.updatedColor = val.hex
+      this.updateColor = false
+      this.changeColor()
+    }
     
   }
 };
 </script>
 <style lang="scss">
+
+html {
+  overflow: hidden;
+}
 
 #hideInput {
   display: none;
@@ -145,9 +200,19 @@ export default {
 }
 
 .chartContainer {
-  height: 600px;
-  max-height: 600px;
+  height: 50vh;
+  max-height: 50vh;
   padding: 20px;
+  width: 100%
+}
+
+#chart_height {
+  height: 50vh;
+}
+
+.chartGroupings {
+  height: 100px;
+  max-height: 100px;
 }
 
 .chartMenu {
@@ -155,6 +220,7 @@ export default {
   max-width: 400px;
   background: #222;
 }
+
 
 .fullWidthContainer {
   width: 100%;
@@ -177,6 +243,10 @@ export default {
   padding: 40px 0;
 }
 
+.colorOptions {
+  width: 50%;
+}
+
 .uploadContainer {
   height: 100px;
 }
@@ -184,4 +254,9 @@ export default {
   font-size: 14px;
   padding-right: 20px;
 }
+
+.rightContainer {
+  width: calc(100vw - 400px)
+}
+
 </style>

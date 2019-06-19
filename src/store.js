@@ -66,7 +66,7 @@ export default new Vuex.Store({
       reader.readAsText(file)
   },
   parseData: function(context, obj) {
-    if(obj.val.length <= 1 && this.chartType === 'column') {
+    if(this.state.chartType === 'pie') {
       this.dispatch('parseSingleData', obj)
     } else if (obj.val.length >=2 && dayjs(obj.data[0][obj.val[1]]).$D) {
       this.dispatch('parseDoubleDateData', obj)
@@ -75,6 +75,7 @@ export default new Vuex.Store({
     }
   },
   parseSingleData: function(context,obj) {
+    console.log('parseSingleData');
     let data = d3
       .nest()
       .key(function(d) {
@@ -93,6 +94,7 @@ export default new Vuex.Store({
     this.commit('setChartData', arr)
   },
   parseDoubleDateData: function(context,obj) {
+    console.log('parseDoubleDateData');
     let data = d3
       .nest()
       .key(function(d) {
@@ -121,6 +123,7 @@ export default new Vuex.Store({
     this.commit('setChartData', arr)
   },
   parseDoubleData: function(context,obj) {
+    console.log('parseDoubleData');
     let data = d3
       .nest()
       .key(function(d) {

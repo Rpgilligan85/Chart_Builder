@@ -1,8 +1,8 @@
 <template v-if="chartReady">
-  <v-flex xs12>
+  <div>
     {{text}}
     <v-select v-if="headers" :items="headers" label="Select Header" solo v-on:change="updateValue"></v-select>
-  </v-flex>
+  </div>
 </template>
 
 <script>
@@ -35,4 +35,5 @@ export default {
 </script>
 
 <style lang="scss">
+
 </style>
